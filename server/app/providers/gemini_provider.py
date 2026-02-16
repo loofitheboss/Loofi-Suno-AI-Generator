@@ -12,6 +12,7 @@ from app.providers.base import (
     classify_exception,
 )
 from app.services.prompt_builder import build_extend_messages, build_generation_messages
+from app.services.prompt_builder import sanitize_style_prompt
 
 
 def _clean_json(text: str | None) -> str:
@@ -36,46 +37,66 @@ class GeminiProvider(BaseLlmProvider):
 
     def generate_pack(self, payload: GenerateRequest) -> GenerateProviderResult:
         system_instruction, user_prompt = build_generation_messages(payload)
-        try:
-            response = self._client.models.generate_content(
-                model=self._model_name,
-                contents=user_prompt,
-                config={
-                    "system_instruction": system_instruction,
-                    "response_mime_type": "application/json",
-                },
-            )
-            raw_text = response.text
-            if not raw_text:
+        for attempt in range(2):
+            try:
+                response = self._client.models.generate_content(
+                    model=self._model_name,
+                    contents=user_prompt,
+                    config={
+                        "system_instruction": system_instruction,
+                        "response_mime_type": "application/json",
+                    },
+                )
+                raw_text = response.text
+                if not raw_text:
+                    raise ProviderError(
+                        "Gemini returned an empty response.",
+                        code=ProviderErrorCode.INVALID_RESPONSE,
+                        retryable=True,
+                    )
+                parsed = json.loads(_clean_json(raw_text))
+                style = sanitize_style_prompt(str(parsed.get("style", "")), payload)
+                return GenerateProviderResult(
+                    provider_name=self.provider_name,
+                    model_name=self._model_name,
+                    title=str(parsed.get("title", "Untitled")),
+                    style=style,
+                    lyrics=str(parsed.get("lyrics", "")),
+                    explanation=str(parsed.get("explanation", "")),
+                )
+            except json.JSONDecodeError as exc:
+                if attempt == 0:
+                    user_prompt = (
+                        user_prompt
+                        + "\nIMPORTANT: Previous response had invalid JSON. Return strict JSON object only."
+                    )
+                    continue
                 raise ProviderError(
-                    "Gemini returned an empty response.",
+                    f"Gemini returned invalid JSON: {exc}",
                     code=ProviderErrorCode.INVALID_RESPONSE,
                     retryable=True,
-                )
-            parsed = json.loads(_clean_json(raw_text))
-            return GenerateProviderResult(
-                provider_name=self.provider_name,
-                model_name=self._model_name,
-                title=str(parsed.get("title", "Untitled")),
-                style=str(parsed.get("style", "")),
-                lyrics=str(parsed.get("lyrics", "")),
-                explanation=str(parsed.get("explanation", "")),
-            )
-        except json.JSONDecodeError as exc:
-            raise ProviderError(
-                f"Gemini returned invalid JSON: {exc}",
-                code=ProviderErrorCode.INVALID_RESPONSE,
-                retryable=True,
-            ) from exc
-        except ProviderError:
-            raise
-        except Exception as exc:  # noqa: BLE001
-            code, retryable = classify_exception(exc)
-            raise ProviderError(
-                f"Gemini request failed: {exc}",
-                code=code,
-                retryable=retryable,
-            ) from exc
+                ) from exc
+            except ProviderError as exc:
+                if exc.code == ProviderErrorCode.INVALID_RESPONSE and attempt == 0:
+                    user_prompt = (
+                        user_prompt
+                        + "\nIMPORTANT: Previous response was malformed. Return strict JSON object only."
+                    )
+                    continue
+                raise
+            except Exception as exc:  # noqa: BLE001
+                code, retryable = classify_exception(exc)
+                raise ProviderError(
+                    f"Gemini request failed: {exc}",
+                    code=code,
+                    retryable=retryable,
+                ) from exc
+
+        raise ProviderError(
+            "Gemini request failed after retries.",
+            code=ProviderErrorCode.INVALID_RESPONSE,
+            retryable=True,
+        )
 
     def extend_lyrics(
         self, current_lyrics: str, topic: str, style: str, language: str

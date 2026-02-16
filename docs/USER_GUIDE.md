@@ -34,6 +34,8 @@ You can edit results, extend lyrics, and copy content directly into Suno custom 
 - `Language`: sets the lyric language preference.
 - `Instrumental mode`: avoids lead vocal lyrics and favors instrumental structure.
 - `Structure`: influences song section layout.
+- `Weirdness`: controls experimental variance.
+- `Style Influence`: controls how strictly generated output follows your tags.
 
 ## Recommended Workflow with Suno
 

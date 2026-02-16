@@ -174,6 +174,54 @@ const InputView: React.FC<InputViewProps> = ({ settings, onSettingsChange, onGen
                 />
                 Instrumental mode (no lead vocals)
               </label>
+
+              <div className="space-y-3 pt-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-500">Weirdness</label>
+                  <button
+                    type="button"
+                    onClick={() => update('weirdness', settings.weirdness === null ? 45 : null)}
+                    className="text-[11px] px-2 py-1 rounded-md border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-600"
+                  >
+                    {settings.weirdness === null ? 'Auto' : `${settings.weirdness}`}
+                  </button>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={settings.weirdness ?? 45}
+                  onChange={(e) => update('weirdness', Number(e.target.value))}
+                  className="w-full accent-fuchsia-500"
+                />
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  Lower values stay safe and radio-friendly. Higher values introduce more experimental ideas.
+                </p>
+              </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-slate-500">Style Influence</label>
+                  <button
+                    type="button"
+                    onClick={() => update('styleInfluence', settings.styleInfluence === null ? 75 : null)}
+                    className="text-[11px] px-2 py-1 rounded-md border border-slate-700 text-slate-400 hover:text-slate-200 hover:border-slate-600"
+                  >
+                    {settings.styleInfluence === null ? 'Auto' : `${settings.styleInfluence}%`}
+                  </button>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={settings.styleInfluence ?? 75}
+                  onChange={(e) => update('styleInfluence', Number(e.target.value))}
+                  className="w-full accent-cyan-500"
+                />
+                <p className="text-[11px] text-slate-500 leading-relaxed">
+                  High values follow your tags strictly. Lower values allow creative genre blending.
+                </p>
+              </div>
             </div>
 
             {/* Structure */}

@@ -12,6 +12,7 @@ The app now uses a backend API with pluggable LLM providers:
 - End users: `docs/USER_GUIDE.md`
 - Developers: `docs/DEVELOPER_GUIDE.md`
 - API reference: `docs/API_REFERENCE.md`
+- Next execution plan: `docs/NEXT_STEPS_PLAN.md`
 
 ## Features
 

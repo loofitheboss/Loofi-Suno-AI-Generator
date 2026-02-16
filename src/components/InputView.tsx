@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import type { SunoSettings } from '@/types';
+import type { SunoSettings, HistoryItem } from '@/types';
 
 interface InputViewProps {
   settings: SunoSettings;
   onSettingsChange: (settings: SunoSettings) => void;
   onGenerate: () => void;
   isGenerating: boolean;
+  history: HistoryItem[];
+  onLoadHistory: (item: HistoryItem) => void;
 }
 
 const VOICE_OPTIONS = ['Any', 'Male', 'Female', 'Duet', 'Instrumental', 'Choir'];
@@ -22,7 +24,14 @@ const structureDescriptions: Record<string, string> = {
   Custom: 'Free-form structure, AI decides creatively',
 };
 
-const InputView: React.FC<InputViewProps> = ({ settings, onSettingsChange, onGenerate, isGenerating }) => {
+const InputView: React.FC<InputViewProps> = ({
+  settings,
+  onSettingsChange,
+  onGenerate,
+  isGenerating,
+  history,
+  onLoadHistory,
+}) => {
   const [showManual, setShowManual] = useState(false);
 
   const update = <K extends keyof SunoSettings>(field: K, value: SunoSettings[K]) => {
@@ -275,6 +284,29 @@ const InputView: React.FC<InputViewProps> = ({ settings, onSettingsChange, onGen
           </>
         )}
       </button>
+
+      {history.length > 0 && (
+        <div className="w-full bg-slate-900/40 p-4 rounded-2xl border border-slate-800 space-y-3">
+          <div className="flex items-center justify-between">
+            <h3 className="text-xs font-bold text-slate-500 uppercase tracking-widest">Recent Projects</h3>
+            <span className="text-[11px] text-slate-600">{history.length} saved</span>
+          </div>
+          <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
+            {history.slice(0, 6).map((item) => (
+              <button
+                key={item.id}
+                onClick={() => onLoadHistory(item)}
+                className="w-full text-left p-3 rounded-lg border border-slate-800 hover:border-slate-700 bg-slate-900/60 hover:bg-slate-800/60 transition-colors"
+              >
+                <div className="text-sm font-semibold text-slate-200 truncate">{item.pack.title || 'Untitled Song'}</div>
+                <div className="text-[11px] text-slate-500 mt-1 truncate">
+                  {item.settings.genre || 'Any genre'} | {item.settings.language} | {new Date(item.createdAt).toLocaleString()}
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   );
 };

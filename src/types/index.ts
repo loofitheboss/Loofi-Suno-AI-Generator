@@ -23,6 +23,13 @@ export interface SunoPack {
   modelUsed?: string;
 }
 
+export interface HistoryItem {
+  id: string;
+  createdAt: string;
+  settings: SunoSettings;
+  pack: SunoPack;
+}
+
 export interface ExtendResponse {
   addedLyrics: string;
   providerUsed: LlmProvider;

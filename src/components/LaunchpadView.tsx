@@ -8,6 +8,10 @@ interface LaunchpadViewProps {
   onExtendLyrics: () => void;
   isExtending: boolean;
   onReset: () => void;
+  onGenerateVariants: () => void;
+  isGeneratingVariants: boolean;
+  variants: SunoPack[];
+  onSelectVariant: (pack: SunoPack) => void;
 }
 
 const CopyButton: React.FC<{
@@ -59,8 +63,14 @@ const LaunchpadView: React.FC<LaunchpadViewProps> = ({
   onExtendLyrics,
   isExtending,
   onReset,
+  onGenerateVariants,
+  isGeneratingVariants,
+  variants,
+  onSelectVariant,
 }) => {
   const lyricsRef = useRef<HTMLTextAreaElement>(null);
+
+  const bundleText = `# ${songData.title || 'Untitled Song'}\n\nStyle:\n${songData.style || ''}\n\nLyrics:\n${songData.lyrics || ''}\n\nStrategy:\n${songData.explanation || ''}`;
 
   const handleInsertTag = useCallback(
     (tag: string) => {
@@ -88,6 +98,21 @@ const LaunchpadView: React.FC<LaunchpadViewProps> = ({
   );
 
   const openSuno = () => window.open('https://suno.com/create', '_blank');
+
+  const handleCopyAll = () => {
+    navigator.clipboard.writeText(bundleText);
+  };
+
+  const handleExportBundle = () => {
+    const blob = new Blob([bundleText], { type: 'text/plain;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    const safeTitle = (songData.title || 'suno-pack').replace(/[^a-z0-9-_]+/gi, '_').toLowerCase();
+    anchor.href = url;
+    anchor.download = `${safeTitle}.txt`;
+    anchor.click();
+    URL.revokeObjectURL(url);
+  };
 
   return (
     <div className="h-full flex flex-col lg:flex-row animate-fade-in-up">
@@ -164,6 +189,46 @@ const LaunchpadView: React.FC<LaunchpadViewProps> = ({
 
         {/* Bottom Actions */}
         <div className="mt-auto pt-4 space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              onClick={handleCopyAll}
+              className="py-2 text-xs font-bold uppercase tracking-wide text-cyan-300 border border-cyan-500/30 bg-cyan-900/15 rounded-lg hover:bg-cyan-900/30 transition-colors"
+            >
+              Copy All
+            </button>
+            <button
+              onClick={handleExportBundle}
+              className="py-2 text-xs font-bold uppercase tracking-wide text-emerald-300 border border-emerald-500/30 bg-emerald-900/15 rounded-lg hover:bg-emerald-900/30 transition-colors"
+            >
+              Export Pack
+            </button>
+          </div>
+
+          <button
+            onClick={onGenerateVariants}
+            disabled={isGeneratingVariants}
+            className="w-full py-2 text-xs font-bold uppercase tracking-wide text-amber-300 border border-amber-500/30 bg-amber-900/10 rounded-lg hover:bg-amber-900/25 transition-colors disabled:opacity-50"
+          >
+            {isGeneratingVariants ? 'Generating Variants...' : 'Generate 2 Variants'}
+          </button>
+
+          {variants.length > 0 && (
+            <div className="space-y-2">
+              {variants.map((variant, index) => (
+                <button
+                  key={`${variant.title}-${index}`}
+                  onClick={() => onSelectVariant(variant)}
+                  className="w-full text-left p-2.5 rounded-lg border border-slate-700 bg-slate-900/60 hover:bg-slate-800/60 hover:border-slate-600 transition-colors"
+                >
+                  <div className="text-xs font-semibold text-slate-200 truncate">
+                    Variant {index + 1}: {variant.title || 'Untitled'}
+                  </div>
+                  <div className="text-[11px] text-slate-500 mt-1 truncate">{variant.style || 'No style returned'}</div>
+                </button>
+              ))}
+            </div>
+          )}
+
           <div className="p-3 bg-fuchsia-900/10 border border-fuchsia-500/20 rounded-lg text-xs text-fuchsia-300 leading-relaxed">
             <strong>Tip:</strong> Paste Style into &quot;Style of Music&quot; and Lyrics into
             &quot;Lyrics&quot; in Custom Mode on Suno.

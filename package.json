@@ -1,7 +1,24 @@
 {
   "name": "loofi-suno-ai-generator",
-  "private": true,
   "version": "1.0.0",
+  "description": "AI-powered song generator for Suno.com using Google Gemini AI",
+  "author": "Loofi",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loofitheboss/Loofi-Suno-AI-Generator.git"
+  },
+  "homepage": "https://github.com/loofitheboss/Loofi-Suno-AI-Generator",
+  "keywords": [
+    "suno",
+    "ai",
+    "music",
+    "song-generator",
+    "gemini",
+    "lyrics",
+    "react"
+  ],
+  "private": true,
   "type": "module",
   "scripts": {
     "dev": "vite",

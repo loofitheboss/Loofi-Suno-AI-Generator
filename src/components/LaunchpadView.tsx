@@ -153,6 +153,13 @@ const LaunchpadView: React.FC<LaunchpadViewProps> = ({
           <p className="text-sm text-slate-400 leading-relaxed italic">
             &quot;{songData.explanation || ''}&quot;
           </p>
+
+          {(songData.providerUsed || songData.modelUsed) && (
+            <p className="text-xs text-slate-500 mt-3">
+              Generated with {songData.providerUsed || 'unknown'}
+              {songData.modelUsed ? ` (${songData.modelUsed})` : ''}
+            </p>
+          )}
         </div>
 
         {/* Bottom Actions */}

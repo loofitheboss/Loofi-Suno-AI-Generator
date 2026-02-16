@@ -1,11 +1,15 @@
 import React from 'react';
+import type { ProviderStatus } from '@/types';
 
 interface HeaderProps {
-  onOpenApiKey: () => void;
-  hasApiKey: boolean;
+  providerStatus: ProviderStatus | null;
+  onRefreshProviders: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ onOpenApiKey, hasApiKey }) => {
+const Header: React.FC<HeaderProps> = ({ providerStatus, onRefreshProviders }) => {
+  const configured = providerStatus?.configured.filter((item) => item !== 'auto') || [];
+  const hasConfiguredProviders = configured.length > 0;
+
   return (
     <header className="px-6 py-4 border-b border-slate-800 bg-slate-900/60 backdrop-blur-lg flex justify-between items-center flex-shrink-0">
       <div className="flex items-center gap-3">
@@ -27,19 +31,29 @@ const Header: React.FC<HeaderProps> = ({ onOpenApiKey, hasApiKey }) => {
         </div>
       </div>
 
-      <button
-        onClick={onOpenApiKey}
-        className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all border ${
-          hasApiKey
-            ? 'bg-slate-800 border-slate-700 text-slate-400 hover:text-slate-200 hover:bg-slate-700'
-            : 'bg-fuchsia-900/20 border-fuchsia-500/40 text-fuchsia-300 hover:bg-fuchsia-900/30 animate-pulse'
-        }`}
-      >
-        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" />
-        </svg>
-        {hasApiKey ? 'API Key Set' : 'Set API Key'}
-      </button>
+      <div className="flex items-center gap-3">
+        <div
+          className={`px-3 py-2 rounded-lg text-xs border ${
+            hasConfiguredProviders
+              ? 'bg-emerald-900/20 border-emerald-500/30 text-emerald-300'
+              : 'bg-amber-900/20 border-amber-500/30 text-amber-300'
+          }`}
+        >
+          {hasConfiguredProviders
+            ? `Providers: ${configured.join(', ')} | Default: ${providerStatus?.defaultProvider}`
+            : 'No LLM providers configured on backend'}
+        </div>
+
+        <button
+          onClick={onRefreshProviders}
+          className="flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-medium transition-all border bg-slate-800 border-slate-700 text-slate-300 hover:text-slate-100 hover:bg-slate-700"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182m0-4.991v4.99" />
+          </svg>
+          Refresh
+        </button>
+      </div>
     </header>
   );
 };

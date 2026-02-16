@@ -1,0 +1,10 @@
+.git
+.gitignore
+node_modules
+dist
+.venv
+__pycache__
+.pytest_cache
+server/.env
+tsconfig.tsbuildinfo
+Suno AI Song Generator Roadmap.md

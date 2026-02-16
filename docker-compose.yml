@@ -1,0 +1,11 @@
+services:
+  loofi-suno-generator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: loofi-suno-generator
+    ports:
+      - "8000:8000"
+    env_file:
+      - server/.env
+    restart: unless-stopped

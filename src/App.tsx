@@ -1,13 +1,10 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import type { SunoSettings, SunoPack, ToastMessage } from '@/types';
-import * as geminiService from '@/services/geminiService';
+import type { SunoSettings, SunoPack, ToastMessage, ProviderStatus } from '@/types';
+import * as songApiService from '@/services/songApiService';
 import Header from '@/components/Header';
 import InputView from '@/components/InputView';
 import LaunchpadView from '@/components/LaunchpadView';
-import ApiKeyModal from '@/components/ApiKeyModal';
 import Toast from '@/components/Toast';
-
-const API_KEY_STORAGE = 'loofi-suno-gemini-key';
 
 const DEFAULT_SETTINGS: SunoSettings = {
   topic: '',
@@ -16,6 +13,11 @@ const DEFAULT_SETTINGS: SunoSettings = {
   voice: 'Any',
   tempo: '',
   structure: 'Auto',
+  language: 'English',
+  isInstrumental: false,
+  provider: 'auto',
+  weirdness: null,
+  styleInfluence: null,
 };
 
 const App: React.FC = () => {
@@ -25,28 +27,11 @@ const App: React.FC = () => {
   const [songData, setSongData] = useState<SunoPack | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [isExtending, setIsExtending] = useState(false);
-
-  // API Key
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem(API_KEY_STORAGE) || '');
-  const [showApiKeyModal, setShowApiKeyModal] = useState(false);
+  const [providerStatus, setProviderStatus] = useState<ProviderStatus | null>(null);
 
   // Toasts
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   let toastCounter = React.useRef(0);
-
-  // Init Gemini client when API key changes
-  useEffect(() => {
-    if (apiKey) {
-      geminiService.initClient(apiKey);
-    }
-  }, [apiKey]);
-
-  // Show API key modal on mount if no key
-  useEffect(() => {
-    if (!apiKey) {
-      setShowApiKeyModal(true);
-    }
-  }, [apiKey]);
 
   // --- Toast Helpers ---
   const addToast = useCallback((message: string, type: ToastMessage['type']) => {
@@ -58,11 +43,19 @@ const App: React.FC = () => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   }, []);
 
-  // --- API Key ---
-  const handleSaveApiKey = useCallback((key: string) => {
-    setApiKey(key);
-    localStorage.setItem(API_KEY_STORAGE, key);
-  }, []);
+  const loadProviderStatus = useCallback(async () => {
+    try {
+      const status = await songApiService.getProviders();
+      setProviderStatus(status);
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to load providers.';
+      addToast(msg, 'error');
+    }
+  }, [addToast]);
+
+  useEffect(() => {
+    loadProviderStatus();
+  }, [loadProviderStatus]);
 
   // --- Generate ---
   const handleGenerate = useCallback(async () => {
@@ -70,15 +63,14 @@ const App: React.FC = () => {
       addToast('Please enter a song topic.', 'error');
       return;
     }
-    if (!apiKey) {
-      addToast('Please set your Gemini API key first.', 'error');
-      setShowApiKeyModal(true);
+    if (!providerStatus || providerStatus.configured.length === 0) {
+      addToast('No providers configured on backend. Set server API keys first.', 'error');
       return;
     }
 
     setIsGenerating(true);
     try {
-      const pack = await geminiService.generateSunoPack(settings);
+      const pack = await songApiService.generateSunoPack(settings);
       setSongData(pack);
       setView('launchpad');
       addToast('Song pack generated successfully!', 'success');
@@ -88,28 +80,36 @@ const App: React.FC = () => {
     } finally {
       setIsGenerating(false);
     }
-  }, [settings, apiKey, addToast]);
+  }, [settings, providerStatus, addToast]);
 
   // --- Extend Lyrics ---
   const handleExtendLyrics = useCallback(async () => {
-    if (!songData || !apiKey) return;
+    if (!songData) return;
     setIsExtending(true);
     try {
-      const newLines = await geminiService.extendSunoLyrics(
+      const extension = await songApiService.extendSunoLyrics(
         songData.lyrics || '',
         settings.topic,
         songData.style || '',
+        settings.language,
+        settings.provider,
       );
-      if (newLines) {
-        setSongData({ ...songData, lyrics: (songData.lyrics || '') + '\n\n' + newLines });
+      if (extension.addedLyrics) {
+        setSongData({
+          ...songData,
+          lyrics: (songData.lyrics || '') + '\n\n' + extension.addedLyrics,
+          providerUsed: extension.providerUsed,
+          modelUsed: extension.modelUsed,
+        });
         addToast('Lyrics extended!', 'success');
       }
-    } catch {
-      addToast('Failed to extend lyrics.', 'error');
+    } catch (error) {
+      const msg = error instanceof Error ? error.message : 'Failed to extend lyrics.';
+      addToast(msg, 'error');
     } finally {
       setIsExtending(false);
     }
-  }, [songData, settings.topic, apiKey, addToast]);
+  }, [songData, settings.topic, settings.language, settings.provider, addToast]);
 
   // --- Reset ---
   const handleReset = useCallback(() => {
@@ -122,8 +122,8 @@ const App: React.FC = () => {
   return (
     <div className="min-h-screen flex flex-col">
       <Header
-        onOpenApiKey={() => setShowApiKeyModal(true)}
-        hasApiKey={!!apiKey}
+        providerStatus={providerStatus}
+        onRefreshProviders={loadProviderStatus}
       />
 
       {/* Main Content */}
@@ -149,14 +149,6 @@ const App: React.FC = () => {
           )}
         </div>
       </main>
-
-      {/* API Key Modal */}
-      <ApiKeyModal
-        isOpen={showApiKeyModal}
-        onClose={() => setShowApiKeyModal(false)}
-        onSave={handleSaveApiKey}
-        currentKey={apiKey}
-      />
 
       {/* Toast Container */}
       <div className="fixed bottom-4 right-4 z-[300] flex flex-col gap-2 max-w-sm">

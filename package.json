@@ -22,11 +22,13 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
+    "dev:client": "vite",
+    "dev:server": "uvicorn app.main:app --reload --app-dir server --port 8000",
+    "dev:all": "npm run dev:server & npm run dev:client",
     "build": "tsc -b && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@google/genai": "^1.0.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

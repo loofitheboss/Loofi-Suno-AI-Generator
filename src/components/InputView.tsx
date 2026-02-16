@@ -10,6 +10,8 @@ interface InputViewProps {
 
 const VOICE_OPTIONS = ['Any', 'Male', 'Female', 'Duet', 'Instrumental', 'Choir'];
 const STRUCTURE_OPTIONS: SunoSettings['structure'][] = ['Auto', 'Standard', 'Pop', 'Rap', 'Ambient', 'Custom'];
+const PROVIDER_OPTIONS: SunoSettings['provider'][] = ['auto', 'gemini', 'openai'];
+const LANGUAGE_OPTIONS = ['English', 'Spanish', 'French', 'German', 'Italian', 'Portuguese', 'Japanese', 'Korean'];
 
 const structureDescriptions: Record<string, string> = {
   Auto: 'AI picks the best structure for your topic',
@@ -23,7 +25,7 @@ const structureDescriptions: Record<string, string> = {
 const InputView: React.FC<InputViewProps> = ({ settings, onSettingsChange, onGenerate, isGenerating }) => {
   const [showManual, setShowManual] = useState(false);
 
-  const update = (field: keyof SunoSettings, value: string) => {
+  const update = <K extends keyof SunoSettings>(field: K, value: SunoSettings[K]) => {
     onSettingsChange({ ...settings, [field]: value });
   };
 
@@ -127,6 +129,51 @@ const InputView: React.FC<InputViewProps> = ({ settings, onSettingsChange, onGen
                   />
                 </div>
               </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-slate-500">Provider</label>
+                  <select
+                    value={settings.provider}
+                    onChange={(e) => update('provider', e.target.value as SunoSettings['provider'])}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:border-fuchsia-500 transition-all"
+                  >
+                    {PROVIDER_OPTIONS.map((provider) => (
+                      <option key={provider} value={provider}>{provider.toUpperCase()}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-xs font-medium text-slate-500">Language</label>
+                  <select
+                    value={settings.language}
+                    onChange={(e) => update('language', e.target.value)}
+                    className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2.5 text-sm text-white focus:ring-2 focus:ring-fuchsia-500/50 focus:border-fuchsia-500 transition-all"
+                  >
+                    {LANGUAGE_OPTIONS.map((language) => (
+                      <option key={language} value={language}>{language}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              <label className="flex items-center gap-3 text-sm text-slate-300 mt-1 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={settings.isInstrumental}
+                  onChange={(e) => {
+                    update('isInstrumental', e.target.checked);
+                    if (e.target.checked) {
+                      update('voice', 'Instrumental');
+                    } else if (settings.voice === 'Instrumental') {
+                      update('voice', 'Any');
+                    }
+                  }}
+                  className="h-4 w-4 rounded border-slate-700 bg-slate-800 text-fuchsia-500 focus:ring-fuchsia-500/60"
+                />
+                Instrumental mode (no lead vocals)
+              </label>
             </div>
 
             {/* Structure */}

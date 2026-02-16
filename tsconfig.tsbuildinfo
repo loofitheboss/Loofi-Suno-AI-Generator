@@ -1,0 +1,1 @@
+{"root":["./src/App.tsx","./src/main.tsx","./src/components/ApiKeyModal.tsx","./src/components/Header.tsx","./src/components/InputView.tsx","./src/components/LaunchpadView.tsx","./src/components/TagToolbar.tsx","./src/components/Toast.tsx","./src/data/sunoTags.ts","./src/services/geminiService.ts","./src/types/index.ts"],"version":"5.9.3"}

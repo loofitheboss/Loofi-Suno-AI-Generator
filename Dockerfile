@@ -22,6 +22,7 @@ RUN pip install --no-cache-dir -r /app/server/requirements.txt
 
 COPY server /app/server
 COPY --from=frontend-builder /app/dist /app/dist
+COPY logo.png /app/logo.png
 
 EXPOSE 8000
 

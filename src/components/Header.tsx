@@ -13,10 +13,12 @@ const Header: React.FC<HeaderProps> = ({ providerStatus, onRefreshProviders }) =
   return (
     <header className="px-6 py-4 border-b border-slate-800 bg-slate-900/60 backdrop-blur-lg flex justify-between items-center flex-shrink-0">
       <div className="flex items-center gap-3">
-        <div className="p-2.5 bg-fuchsia-900/30 rounded-xl border border-fuchsia-500/30 shadow-lg shadow-fuchsia-900/20">
-          <svg className="w-6 h-6 text-fuchsia-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M9 19V6l12-3v13M9 19c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zm12-3c0 1.105-1.343 2-3 2s-3-.895-3-2 1.343-2 3-2 3 .895 3 2zM9 10l12-3" />
-          </svg>
+        <div className="h-11 w-11 rounded-xl border border-fuchsia-500/30 bg-slate-950/70 p-1 shadow-lg shadow-fuchsia-900/20 overflow-hidden">
+          <img
+            src="/logo.png"
+            alt="Loofi Suno logo"
+            className="h-full w-full object-cover rounded-lg"
+          />
         </div>
         <div>
           <h1 className="text-xl font-bold text-slate-100 tracking-tight flex items-center gap-2">

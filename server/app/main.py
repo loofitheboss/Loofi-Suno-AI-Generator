@@ -41,4 +41,7 @@ if dist_dir.exists():
         candidate = dist_dir / full_path
         if candidate.exists() and candidate.is_file():
             return FileResponse(candidate)
+        root_candidate = project_root / full_path
+        if root_candidate.exists() and root_candidate.is_file():
+            return FileResponse(root_candidate)
         return FileResponse(dist_dir / "index.html")

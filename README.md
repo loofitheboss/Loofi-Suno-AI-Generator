@@ -7,6 +7,12 @@ The app now uses a backend API with pluggable LLM providers:
 - OpenAI
 - Auto fallback routing (tries providers by configured order)
 
+## Documentation
+
+- End users: `docs/USER_GUIDE.md`
+- Developers: `docs/DEVELOPER_GUIDE.md`
+- API reference: `docs/API_REFERENCE.md`
+
 ## Features
 
 - **AI Song Generation** -- Describe your song topic and get a full song pack: title, style prompt, structured lyrics, and a creative strategy note

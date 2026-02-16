@@ -1,7 +1,7 @@
 {
   "name": "loofi-suno-ai-generator",
   "version": "1.0.0",
-  "description": "AI-powered song generator for Suno.com using Google Gemini AI",
+  "description": "AI-powered Suno song generator with FastAPI backend and Gemini/OpenAI providers",
   "author": "Loofi",
   "license": "MIT",
   "repository": {
@@ -15,6 +15,9 @@
     "music",
     "song-generator",
     "gemini",
+    "openai",
+    "fastapi",
+    "docker",
     "lyrics",
     "react"
   ],

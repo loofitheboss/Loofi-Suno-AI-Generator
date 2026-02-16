@@ -106,6 +106,15 @@ See `docs/API_REFERENCE.md` for request/response contracts.
 
 ## Build and Packaging
 
+## Tests
+
+Run backend tests locally:
+
+```bash
+pip install -r server/requirements-dev.txt
+PYTHONPATH=server pytest server/tests -q
+```
+
 ### Frontend build
 
 ```bash

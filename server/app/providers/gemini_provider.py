@@ -7,7 +7,9 @@ from app.providers.base import (
     BaseLlmProvider,
     ExtendProviderResult,
     GenerateProviderResult,
+    ProviderErrorCode,
     ProviderError,
+    classify_exception,
 )
 from app.services.prompt_builder import build_extend_messages, build_generation_messages
 
@@ -44,6 +46,12 @@ class GeminiProvider(BaseLlmProvider):
                 },
             )
             raw_text = response.text
+            if not raw_text:
+                raise ProviderError(
+                    "Gemini returned an empty response.",
+                    code=ProviderErrorCode.INVALID_RESPONSE,
+                    retryable=True,
+                )
             parsed = json.loads(_clean_json(raw_text))
             return GenerateProviderResult(
                 provider_name=self.provider_name,
@@ -53,8 +61,21 @@ class GeminiProvider(BaseLlmProvider):
                 lyrics=str(parsed.get("lyrics", "")),
                 explanation=str(parsed.get("explanation", "")),
             )
+        except json.JSONDecodeError as exc:
+            raise ProviderError(
+                f"Gemini returned invalid JSON: {exc}",
+                code=ProviderErrorCode.INVALID_RESPONSE,
+                retryable=True,
+            ) from exc
+        except ProviderError:
+            raise
         except Exception as exc:  # noqa: BLE001
-            raise ProviderError(f"Gemini request failed: {exc}") from exc
+            code, retryable = classify_exception(exc)
+            raise ProviderError(
+                f"Gemini request failed: {exc}",
+                code=code,
+                retryable=retryable,
+            ) from exc
 
     def extend_lyrics(
         self, current_lyrics: str, topic: str, style: str, language: str
@@ -73,5 +94,12 @@ class GeminiProvider(BaseLlmProvider):
                 model_name=self._model_name,
                 added_lyrics=(response.text or "").strip(),
             )
+        except ProviderError:
+            raise
         except Exception as exc:  # noqa: BLE001
-            raise ProviderError(f"Gemini extend failed: {exc}") from exc
+            code, retryable = classify_exception(exc)
+            raise ProviderError(
+                f"Gemini extend failed: {exc}",
+                code=code,
+                retryable=retryable,
+            ) from exc

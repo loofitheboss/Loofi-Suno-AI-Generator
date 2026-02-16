@@ -7,7 +7,9 @@ from app.providers.base import (
     BaseLlmProvider,
     ExtendProviderResult,
     GenerateProviderResult,
+    ProviderErrorCode,
     ProviderError,
+    classify_exception,
 )
 from app.services.prompt_builder import build_extend_messages, build_generation_messages
 
@@ -31,6 +33,12 @@ class OpenAiProvider(BaseLlmProvider):
                 ],
             )
             text = response.choices[0].message.content or "{}"
+            if text == "{}":
+                raise ProviderError(
+                    "OpenAI returned an empty JSON response.",
+                    code=ProviderErrorCode.INVALID_RESPONSE,
+                    retryable=True,
+                )
             parsed = json.loads(text)
             return GenerateProviderResult(
                 provider_name=self.provider_name,
@@ -40,8 +48,21 @@ class OpenAiProvider(BaseLlmProvider):
                 lyrics=str(parsed.get("lyrics", "")),
                 explanation=str(parsed.get("explanation", "")),
             )
+        except json.JSONDecodeError as exc:
+            raise ProviderError(
+                f"OpenAI returned invalid JSON: {exc}",
+                code=ProviderErrorCode.INVALID_RESPONSE,
+                retryable=True,
+            ) from exc
+        except ProviderError:
+            raise
         except Exception as exc:  # noqa: BLE001
-            raise ProviderError(f"OpenAI request failed: {exc}") from exc
+            code, retryable = classify_exception(exc)
+            raise ProviderError(
+                f"OpenAI request failed: {exc}",
+                code=code,
+                retryable=retryable,
+            ) from exc
 
     def extend_lyrics(
         self, current_lyrics: str, topic: str, style: str, language: str
@@ -63,5 +84,12 @@ class OpenAiProvider(BaseLlmProvider):
                 model_name=self._model_name,
                 added_lyrics=text,
             )
+        except ProviderError:
+            raise
         except Exception as exc:  # noqa: BLE001
-            raise ProviderError(f"OpenAI extend failed: {exc}") from exc
+            code, retryable = classify_exception(exc)
+            raise ProviderError(
+                f"OpenAI extend failed: {exc}",
+                code=code,
+                retryable=retryable,
+            ) from exc

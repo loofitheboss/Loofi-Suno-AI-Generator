@@ -1,6 +1,6 @@
 from app.core.config import Settings
 from app.models.schemas import ProviderName
-from app.providers.base import BaseLlmProvider, ProviderError
+from app.providers.base import BaseLlmProvider, ProviderError, ProviderErrorCode
 from app.providers.gemini_provider import GeminiProvider
 from app.providers.openai_provider import OpenAiProvider
 
@@ -53,8 +53,14 @@ class ProviderRouter:
 
     def get_provider(self, name: ProviderName) -> BaseLlmProvider:
         if name == "auto":
-            raise ProviderError("Cannot resolve provider for auto directly")
+            raise ProviderError(
+                "Cannot resolve provider for auto directly",
+                code=ProviderErrorCode.CONFIGURATION,
+            )
         provider = self._providers.get(name)
         if not provider:
-            raise ProviderError(f"Provider '{name}' is not configured")
+            raise ProviderError(
+                f"Provider '{name}' is not configured",
+                code=ProviderErrorCode.CONFIGURATION,
+            )
         return provider

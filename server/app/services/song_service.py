@@ -78,10 +78,13 @@ class SongService:
                 last_error = exc
                 errors.append(_format_error(provider_name, exc))
                 logger.warning(
-                    "generate_provider_failed provider=%s code=%s retryable=%s",
-                    provider_name,
-                    exc.code.value,
-                    exc.retryable,
+                    "generate_provider_failed",
+                    extra={
+                        "event": "generate_provider_failed",
+                        "provider": provider_name,
+                        "code": exc.code.value,
+                        "retryable": exc.retryable,
+                    },
                 )
 
         if last_error and payload.provider != "auto":
@@ -121,10 +124,13 @@ class SongService:
                 last_error = exc
                 errors.append(_format_error(provider_name, exc))
                 logger.warning(
-                    "extend_provider_failed provider=%s code=%s retryable=%s",
-                    provider_name,
-                    exc.code.value,
-                    exc.retryable,
+                    "extend_provider_failed",
+                    extra={
+                        "event": "extend_provider_failed",
+                        "provider": provider_name,
+                        "code": exc.code.value,
+                        "retryable": exc.retryable,
+                    },
                 )
 
         if last_error and payload.provider != "auto":

@@ -41,12 +41,15 @@ async def request_context_middleware(request: Request, call_next):
     duration_ms = (perf_counter() - start) * 1000
     response.headers["x-request-id"] = request_id
     logger.info(
-        "request_complete request_id=%s method=%s path=%s status=%s duration_ms=%.2f",
-        request_id,
-        request.method,
-        request.url.path,
-        response.status_code,
-        duration_ms,
+        "request_complete",
+        extra={
+            "event": "request_complete",
+            "request_id": request_id,
+            "method": request.method,
+            "path": request.url.path,
+            "status": response.status_code,
+            "duration_ms": round(duration_ms, 2),
+        },
     )
     return response
 

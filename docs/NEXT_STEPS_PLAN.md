@@ -122,9 +122,80 @@ This plan defines what to build next so the app evolves from a working MVP into 
 
 ## Execution Checklist
 
-- [ ] Add backend tests and CI workflow
-- [ ] Add standardized provider error mapping
-- [ ] Add request ID + structured logging
-- [ ] Expose `weirdness` and `styleInfluence` in UI
+- [x] Add backend tests and CI workflow
+- [x] Add standardized provider error mapping
+- [x] Add request ID + structured logging
+- [x] Expose `weirdness` and `styleInfluence` in UI
 - [ ] Implement history + variants + export
 - [ ] Add rate limiting/auth and metrics
+
+## Validation Snapshot (2026-02-16)
+
+- Verified implemented:
+  - Backend endpoint tests exist for health/providers/generate/extend routes.
+  - Provider `auto` fallback behavior is covered in service tests.
+  - Provider error mapping to user-facing HTTP errors is implemented.
+  - Backend test CI workflow exists: `.github/workflows/backend-tests.yml`.
+  - UI already exposes `weirdness` and `styleInfluence` controls.
+- Environment note:
+  - Local backend test execution was blocked in this machine due Python 3.14 incompatibility with pinned dependencies.
+  - CI is configured for Python 3.12, which matches the backend workflow.
+
+## Immediate Implementation Order (Current)
+
+1. Implement generation history with local persistence.
+2. Add "Regenerate Variants" (2-3 alternatives per run).
+3. Add "Copy All" and export bundle support.
+4. Improve long-running loading/error states in UI.
+5. Add optional auth + basic rate limiting.
+6. Add lightweight provider/endpoint metrics.
+
+## Sprint 1 Detailed Breakdown
+
+### Day 1-2: Test Foundation
+
+- Set up test runner + fixtures for API route testing.
+- Add happy-path tests for:
+  - `GET /api/health`
+  - `GET /api/song/providers`
+  - `POST /api/song/generate`
+  - `POST /api/song/extend`
+- Add failure-path tests for validation and provider errors.
+
+### Day 3: Fallback + Error Taxonomy
+
+- Add deterministic tests for `provider=auto` fallback ordering.
+- Implement and test canonical provider error mapping:
+  - `AUTH_ERROR`
+  - `QUOTA_EXCEEDED`
+  - `RATE_LIMITED`
+  - `NETWORK_TIMEOUT`
+  - `PROVIDER_UNKNOWN`
+
+### Day 4: Observability
+
+- Add request ID middleware/hook.
+- Include request ID in response headers and logs.
+- Convert logs to structured JSON entries with safe field allowlist.
+
+### Day 5: CI + Release Gate
+
+- Add GitHub Actions workflow for backend tests.
+- Require passing backend tests before merge.
+- Tag and release `v1.2.0` after green CI and smoke checks.
+
+## Exit Metrics Per Sprint
+
+- Sprint 1:
+  - >= 80% backend route-level coverage for target endpoints.
+  - 100% mapped provider errors use canonical categories.
+  - CI backend test workflow runs on all PRs and blocks merges on fail.
+- Sprint 2:
+  - Reduced malformed prompt/output retries by >= 30%.
+  - Advanced controls visible and functional in generation UI.
+- Sprint 3:
+  - Users can retrieve and reuse prior generations without re-entry.
+  - Variant generation available in <= 2 clicks from previous result.
+- Sprint 4:
+  - Basic rate-limit/auth enabled for hosted mode.
+  - Provider reliability/latency metrics visible in operational logs.

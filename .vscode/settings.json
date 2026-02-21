@@ -1,0 +1,43 @@
+{
+  // Python (FastAPI backend in server/)
+  "python.defaultInterpreterPath": "python",
+
+  // Ruff — linter + formatter for Python
+  "ruff.enable": true,
+  "ruff.lint.run": "onSave",
+  "ruff.fixAll": true,
+  "ruff.organizeImports": true,
+
+  // Mypy — type checking
+  "mypy-type-checker.args": [
+    "--ignore-missing-imports"
+  ],
+
+  // Pylint
+  "pylint.args": [
+    "--disable=C0114,C0115,C0116,C0301,E0401"
+  ],
+
+  // Python formatting via ruff
+  "[python]": {
+    "editor.defaultFormatter": "charliermarsh.ruff",
+    "editor.formatOnSave": true,
+    "editor.codeActionsOnSave": {
+      "source.fixAll.ruff": "explicit",
+      "source.organizeImports.ruff": "explicit"
+    }
+  },
+
+  // TypeScript/JavaScript (React frontend)
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true
+  },
+
+  // ESLint
+  "eslint.useFlatConfig": true
+}

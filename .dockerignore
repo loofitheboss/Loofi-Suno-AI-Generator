@@ -1,10 +1,72 @@
-.git
-.gitignore
+# Dependencies
 node_modules
-dist
 .venv
 __pycache__
 .pytest_cache
+.ruff_cache
+
+# Build outputs (rebuilt inside container)
+dist
+dist-ssr
+
+# Version control
+.git
+.gitignore
+.gitattributes
+
+# Docker files
+.dockerignore
+Dockerfile*
+docker-compose*
+compose*.yml
+compose*.yaml
+
+# AI tool directories
+.copilot
+.claude
+.agent
+.ai
+.chatgpt
+.codex
+.opencode
+.taskmaster
+
+# Dev tooling (not needed in container)
+.github
+.vscode
+.vs
+.idea
+.mcp.json
+.pre-commit-config.yaml
+
+# Test artifacts
+.pytest_cache
+coverage
+test-results
+
+# Temp files
+tmpclaude-*
+.tmp-*
+
+# Logs
+*.log
+logs
+
+# IDE/OS files
+.DS_Store
+*.suo
+*.sw?
+
+# Docs (not needed in container)
+*.md
+docs
+LICENSE
+
+# Env/secrets
+.env
+.env.*
+!.env.example
 server/.env
+
+# Build info
 tsconfig.tsbuildinfo
-Suno AI Song Generator Roadmap.md

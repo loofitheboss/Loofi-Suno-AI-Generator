@@ -1,4 +1,5 @@
 import logging
+import os
 from pathlib import Path
 from time import perf_counter
 from uuid import uuid4
@@ -20,9 +21,19 @@ logger = logging.getLogger(__name__)
 
 app = FastAPI(title="Loofi Suno AI Generator API", version="1.0.0")
 
+configured_origins = os.getenv("SUNO_CORS_ORIGINS", "").strip()
+default_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+    "http://192.168.1.3:5173",
+]
+allowed_origins = [
+    origin.strip() for origin in configured_origins.split(",") if origin.strip()
+] or default_origins
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -58,7 +69,11 @@ project_root = Path(__file__).resolve().parents[2]
 dist_dir = project_root / "dist"
 
 if dist_dir.exists():
-    app.mount("/assets", StaticFiles(directory=dist_dir / "assets"), name="assets")
+    app.mount(
+        "/assets",
+        StaticFiles(directory=dist_dir / "assets"),
+        name="assets",
+    )
 
     @app.get("/")
     def serve_index() -> FileResponse:

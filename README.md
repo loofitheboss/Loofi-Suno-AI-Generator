@@ -125,6 +125,17 @@ You can run the same container image on both Linux and Windows hosts (Docker Des
 docker buildx build --platform linux/amd64,linux/arm64 -t loofi-suno-ai-generator:latest .
 ```
 
+### Run the published GHCR image directly (without Docker Compose)
+
+```bash
+docker run -d -p 8000:8000 \
+  -e GEMINI_API_KEY=your_gemini_key \
+  ghcr.io/loofitheboss/loofi-suno-ai-generator:latest
+```
+
+Pass `OPENAI_API_KEY` instead of (or in addition to) `GEMINI_API_KEY` if you prefer OpenAI.
+Open `http://localhost:8000` once the container is healthy (`docker ps` shows `(healthy)`).
+
 ## GitHub Actions Image Publish
 
 This repo now includes `.github/workflows/docker-image.yml`.

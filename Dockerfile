@@ -26,4 +26,9 @@ COPY logo.png /app/logo.png
 
 EXPOSE 8000
 
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "/app/server"]
+HEALTHCHECK --interval=30s --timeout=10s --start-period=10s --retries=3 \
+  CMD python -c "import urllib.request, sys; \
+    r = urllib.request.urlopen('http://localhost:8000/api/health', timeout=5); \
+    sys.exit(0 if r.status == 200 else 1)"
+
+ENTRYPOINT ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--app-dir", "/app/server"]

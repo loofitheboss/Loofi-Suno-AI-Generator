@@ -27,3 +27,13 @@ jobs:
             Also available as `latest` (default branch builds):
 
             `ghcr.io/${{ github.repository_owner }}/loofi-suno-ai-generator:latest`
+
+            ### Quick start
+
+            ```bash
+            docker run -d -p 8000:8000 \
+              -e GEMINI_API_KEY=your_key \
+              ghcr.io/${{ github.repository_owner }}/loofi-suno-ai-generator:${{ github.ref_name }}
+            ```
+
+            Open `http://localhost:8000` once the container is healthy.

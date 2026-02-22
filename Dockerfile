@@ -12,7 +12,7 @@ COPY vite.config.ts ./
 COPY src ./src
 RUN npm run build
 
-FROM python:3.12-slim AS app
+FROM python:3.14-slim AS app
 WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
